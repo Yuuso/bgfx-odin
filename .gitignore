@@ -1,0 +1,16 @@
+# Example binaries & BGFX dependencies
+*.exe
+*.pdb
+*.obj
+*.lib
+*.a
+/example/example
+/example/mini_example
+
+# OLS
+*.json
+
+# Example shaders
+example/data/bgfx_shader.sh
+example/data/build/*
+example/data/runtime/*
