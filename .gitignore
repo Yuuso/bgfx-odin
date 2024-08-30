@@ -7,9 +7,6 @@
 /example/example
 /example/mini_example
 
-# OLS
-*.json
-
 # Example shaders
 example/data/bgfx_shader.sh
 example/data/build/*
