@@ -635,4 +635,3 @@ if (...) == nil then
     -- Run `lua bindings-odin.lua` in command line to output bindings.
     print(generate())
 end
-
