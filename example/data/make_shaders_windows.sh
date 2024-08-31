@@ -3,7 +3,7 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 BGFX_DIR=$SCRIPT_DIR/../../../bgfx
 
-if [ ! -f $BGFX_DIR/tools/bin/linux/shaderc ]; then
+if [ ! -f $BGFX_DIR/tools/bin/windows/shaderc ]; then
 	echo "shaderc not found!"
 	exit 1
 fi

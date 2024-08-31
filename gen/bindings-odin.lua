@@ -15,15 +15,18 @@ $version
 
 when ODIN_OS == .Windows {
     when ODIN_DEBUG {
+        @(extra_linker_flags="/NODEFAULTLIB:libcmt")
         foreign import lib {
-            "system:libcmtd.lib",
+            "system:gdi32.lib",
+            "system:psapi.lib",
             "lib/bgfxDebug.lib",
             "lib/bimgDebug.lib",
             "lib/bxDebug.lib",
         }
     } else {
         foreign import lib {
-            "system:Msvcrt.lib",
+            "system:gdi32.lib",
+            "system:psapi.lib",
             "lib/bgfxRelease.lib",
             "lib/bimgRelease.lib",
             "lib/bxRelease.lib",
@@ -34,15 +37,15 @@ when ODIN_OS == .Windows {
         foreign import lib {
             "system:stdc++",
             "lib/libbgfxDebug.a",
-            "lib/blibimgDebug.a",
-            "lib/blibxDebug.a",
+            "lib/libbimgDebug.a",
+            "lib/libbxDebug.a",
         }
     } else {
         foreign import lib {
             "system:stdc++",
-            "lib/blibgfxRelease.a",
-            "lib/blibimgRelease.a",
-            "lib/blibxRelease.a",
+            "lib/libbgfxRelease.a",
+            "lib/libbimgRelease.a",
+            "lib/libbxRelease.a",
         }
     }
 } else {

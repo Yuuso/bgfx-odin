@@ -11,15 +11,18 @@ API_VERSION :: 128
 
 when ODIN_OS == .Windows {
     when ODIN_DEBUG {
+        @(extra_linker_flags="/NODEFAULTLIB:libcmt")
         foreign import lib {
-            "system:libcmtd.lib",
+            "system:gdi32.lib",
+            "system:psapi.lib",
             "lib/bgfxDebug.lib",
             "lib/bimgDebug.lib",
             "lib/bxDebug.lib",
         }
     } else {
         foreign import lib {
-            "system:Msvcrt.lib",
+            "system:gdi32.lib",
+            "system:psapi.lib",
             "lib/bgfxRelease.lib",
             "lib/bimgRelease.lib",
             "lib/bxRelease.lib",
@@ -42,7 +45,7 @@ when ODIN_OS == .Windows {
         }
     }
 } else {
-    #panic("OS libs for bgfx not available")
+    #panic("OS not supported!")
 }
 
 

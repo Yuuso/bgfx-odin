@@ -295,7 +295,7 @@ set_allocator_vtable :: proc(
         if ptr != nil {
             err := runtime.mem_free(ptr, context.allocator, loc)
             assert(err == .None)
-            fmt.printfln("free   %16v          %v:%v", ptr, file, line)
+            //fmt.printfln("free   %16v          %v:%v", ptr, file, line)
         }
 
         if size > 0 {
@@ -304,7 +304,7 @@ set_allocator_vtable :: proc(
                 context.allocator, loc)
             assert(err == .None)
             result = raw_data(bytes)
-            fmt.printfln("alloc  %16v % -8v %v:%v", raw_data(bytes), size, file, line)
+            //fmt.printfln("alloc  %16v % -8v %v:%v", raw_data(bytes), size, file, line)
         }
 
         return
@@ -339,7 +339,7 @@ set_callback_vtable :: proc(
         loc : runtime.Source_Code_Location
         loc.line = cast(i32) line
         loc.file_path = string(file_path)
-        fmt.printf("%v: %s", loc, format)
+        //fmt.printf("%v: %s", loc, format)
     }
 
     callback_vtable.profiler_begin = proc "c" (
