@@ -67,7 +67,7 @@ Callback_Vtable :: struct {
         file_path       : cstring,
         line            : c.uint16_t,
         format          : cstring,
-        // ...
+        #c_vararg args  : ..any
     ),
 
     profiler_begin : proc "c" (
@@ -140,7 +140,7 @@ Callback_Vtable :: struct {
     )
 }
 Callback_Interface :: struct {
-    vtable              : ^Callback_Vtable,
+    vtable              : ^Callback_Vtable
 }
 
 Allocator_Vtable :: struct {
@@ -154,7 +154,7 @@ Allocator_Vtable :: struct {
     ) -> rawptr
 }
 Allocator_Interface :: struct {
-    vtable              : ^Allocator_Vtable,
+    vtable              : ^Allocator_Vtable
 }
 
 Release_Fn :: #type proc "c" (ptr : rawptr, user_data : rawptr)
@@ -1624,7 +1624,7 @@ dbg_text_printf :: proc(
     y                 : c.uint16_t,
     attr              : c.uint8_t,
     format            : cstring,
-    // ...
+    #c_vararg args    : ..any
 ) ---
 
 // Draw image into internal debug text buffer.
