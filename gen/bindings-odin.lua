@@ -71,7 +71,7 @@ Callback_Vtable :: struct {
         file_path       : cstring,
         line            : c.uint16_t,
         format          : cstring,
-        #c_vararg args  : ..any
+        args            : ^c.va_list
     ),
 
     profiler_begin : proc "c" (

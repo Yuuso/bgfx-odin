@@ -14,6 +14,34 @@ import "vendor:glfw"
 import "../bgfx"
 
 
+// core:c/libc uses the wrong version...
+when ODIN_OS == .Windows {
+    when ODIN_DEBUG {
+        foreign import libc {
+            "system:libcmtd.lib",
+            "system:legacy_stdio_definitions.lib",
+        }
+    } else {
+        foreign import libc {
+            "system:libcmt.lib",
+            "system:legacy_stdio_definitions.lib",
+        }
+    }
+} else {
+    foreign import libc "system:c"
+}
+
+@(default_calling_convention = "c")
+foreign libc {
+    vsnprintf :: proc(
+        s       : [^]c.char,
+        n       : c.size_t,
+        format  : cstring,
+        arg     : ^c.va_list
+    ) -> int ---
+}
+
+
 // Poor man's event queue...
 g_keep_rendering      := true
 g_window_size_changed := false
@@ -149,7 +177,8 @@ api_thread_proc :: proc(
 
         {
             bgfx.dbg_text_clear(0, false)
-            bgfx.dbg_text_printf(1, 1, 0x0f, fmt.ctprintf("fps: %.0f", 1 / time.duration_seconds(last_frame_duration)))
+            bgfx.dbg_text_printf(1, 1, 0x0f,
+                "fps: %.0f", 1 / time.duration_seconds(last_frame_duration))
         }
 
         {
@@ -169,6 +198,7 @@ api_thread_proc :: proc(
         }
 
         bgfx.frame(false)
+        free_all(context.temp_allocator)
     }
 }
 
@@ -230,6 +260,7 @@ main :: proc() {
         glfw.PollEvents()
         update_window_size(window)
         bgfx.render_frame(-1)
+        free_all(context.temp_allocator)
     }
 
     intrinsics.atomic_store(&g_keep_rendering, false)
@@ -333,13 +364,20 @@ set_callback_vtable :: proc(
         file_path       : cstring,
         line            : c.uint16_t,
         format          : cstring,
-        // ...
+        args            : ^c.va_list
     ) {
         context = runtime.default_context()
+
+        buf : [512]c.char
+        n := vsnprintf(&buf[0], 512, format, args)
+        assert(n > 0 && n < 512)
+        trace_msg := string(buf[:n])
+
         loc : runtime.Source_Code_Location
         loc.line = cast(i32) line
         loc.file_path = string(file_path)
-        //fmt.printf("%v: %s", loc, format)
+
+        fmt.printf("%v: %s", loc, trace_msg)
     }
 
     callback_vtable.profiler_begin = proc "c" (
