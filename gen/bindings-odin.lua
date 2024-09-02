@@ -292,6 +292,33 @@ local function has_suffix(str, suffix)
 end
 
 
+local function convert_value(value)
+    if value == "BGFX_INVALID_HANDLE" then
+        return "{ INVALID_HANDLE }"
+    end
+    if value:find("BGFX_") then
+        value = value:gsub("(%S)|(%S)", function(a, b)
+            return a .. " | " .. b
+        end)
+        value = value:gsub("BGFX_SAMPLER_([%a_]+)", function(v)
+            -- flags params are u64 but the sampler values are u32 for some reason...
+            return "c.uint64_t(SAMPLER_" .. v .. ")"
+        end)
+        value = value:gsub("BGFX_", "")
+        return value
+    end
+    value = value:gsub(".*::",           ".")
+    value = value:gsub("NULL",           "nil")
+    value = value:gsub("^INT64_MAX",     "max(c.int64_t)")
+    value = value:gsub("^INT32_MAX",     "max(c.int32_t)")
+    value = value:gsub("^UINT64_MAX",    "max(c.uint64_t)")
+    value = value:gsub("^UINT32_MAX",    "max(c.uint32_t)")
+    value = value:gsub("^UINT16_MAX",    "max(c.uint16_t)")
+    value = value:gsub("^UINT8_MAX",     "max(c.uint8_t)")
+    value = value:gsub("f$",             "")
+    return value
+end
+
 local function convert_const_name(name)
     -- ConstName -> CONST_NAME
     local ret = name:sub(1,1) .. name:sub(2):gsub("(%u)", function(uc)
@@ -355,12 +382,6 @@ local function convert_type(arg)
             return convert_type_name(t) .. "."
         end) .. ctype
     end
-
-    -- TODO: Default arguments
-    --
-    --if arg.default ~= nil then
-    --    ctype = ctype .. " = " .. tostring(arg.default)
-    --end
 
     return ctype
 end
@@ -582,11 +603,16 @@ function converter.funcs(func)
             local argf = string.format("%-17s : ..any", "#c_vararg args")
             table.insert(args, argf)
         else
-            if not is_empty(arg.name) then
-                local argf = string.format("%-17s : %s", convert_arg_name(arg.name), convert_type(arg))
-                table.insert(args, argf)
+            assert(not is_empty(arg.name))
+            if arg.default ~= nil then
+                table.insert(args, string.format("%-17s : %-20s = %s",
+                    convert_arg_name(arg.name),
+                    convert_type(arg),
+                    convert_value(tostring(arg.default))))
             else
-                table.insert(args, convert_type(arg))
+                table.insert(args, string.format("%-17s : %s",
+                    convert_arg_name(arg.name),
+                    convert_type(arg)))
             end
         end
     end

@@ -28,7 +28,7 @@ main :: proc() {
             }
         })
 
-    bgfx.render_frame(-1)
+    bgfx.render_frame()
 
     init : bgfx.Init
     bgfx.init_ctor(&init)
@@ -49,12 +49,12 @@ main :: proc() {
     defer bgfx.shutdown()
 
     bgfx.set_debug(bgfx.DEBUG_STATS)
-    bgfx.set_view_clear(0, bgfx.CLEAR_COLOR, 0x303030ff, 1.0, 0)
+    bgfx.set_view_clear(0, bgfx.CLEAR_COLOR, 0x303030ff)
     bgfx.set_view_rect_ratio(0, 0, 0, bgfx.Backbuffer_Ratio.Equal)
 
     for !glfw.WindowShouldClose(window) {
         glfw.PollEvents()
         bgfx.touch(0)
-        bgfx.frame(false)
+        bgfx.frame()
     }
 }

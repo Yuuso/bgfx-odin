@@ -1276,11 +1276,11 @@ foreign lib {
 attachment_init :: proc(
     this              : ^Attachment,
     handle            : Texture_Handle,
-    access            : Access,
-    layer             : c.uint16_t,
-    num_layers        : c.uint16_t,
-    mip               : c.uint16_t,
-    resolve           : c.uint8_t
+    access            : Access               = .Write,
+    layer             : c.uint16_t           = 0,
+    num_layers        : c.uint16_t           = 1,
+    mip               : c.uint16_t           = 0,
+    resolve           : c.uint8_t            = RESOLVE_AUTO_GEN_MIPS
 ) ---
 
 // Start VertexLayout.
@@ -1288,7 +1288,7 @@ attachment_init :: proc(
 // @returns Returns itself.
 vertex_layout_begin :: proc(
     this              : ^Vertex_Layout,
-    renderer_type     : Renderer_Type
+    renderer_type     : Renderer_Type        = .Noop
 ) -> ^Vertex_Layout ---
 
 // Add attribute to VertexLayout.
@@ -1309,8 +1309,8 @@ vertex_layout_add :: proc(
     attrib            : Attrib,
     num               : c.uint8_t,
     type              : Attrib_Type,
-    normalized        : bool,
-    as_int            : bool
+    normalized        : bool                 = false,
+    as_int            : bool                 = false
 ) -> ^Vertex_Layout ---
 
 // Decode attribute.
@@ -1362,7 +1362,7 @@ vertex_pack :: proc(
     attr              : Attrib,
     layout            : ^Vertex_Layout,
     data              : rawptr,
-    index             : c.uint32_t
+    index             : c.uint32_t           = 0
 ) ---
 
 // Unpack vertex attribute from vertex stream format.
@@ -1376,7 +1376,7 @@ vertex_unpack :: proc(
     attr              : Attrib,
     layout            : ^Vertex_Layout,
     data              : rawptr,
-    index             : c.uint32_t
+    index             : c.uint32_t           = 0
 ) ---
 
 // Converts vertex stream data from one vertex stream format to another.
@@ -1390,7 +1390,7 @@ vertex_convert :: proc(
     dst_data          : rawptr,
     src_layout        : ^Vertex_Layout,
     src_data          : rawptr,
-    num               : c.uint32_t
+    num               : c.uint32_t           = 1
 ) ---
 
 // Weld vertices.
@@ -1408,7 +1408,7 @@ weld_vertices :: proc(
     data              : rawptr,
     num               : c.uint32_t,
     index32           : bool,
-    epsilon           : c.float
+    epsilon           : c.float              = 0.001
 ) -> c.uint32_t ---
 
 // Convert index buffer for use with different primitive topologies.
@@ -1464,8 +1464,8 @@ topology_sort_tri_list :: proc(
 // @param inout  type              Array where supported renderers will be written.
 // @returns Number of supported renderers.
 get_supported_renderers :: proc(
-    max               : c.uint8_t,
-    type              : ^Renderer_Type
+    max               : c.uint8_t            = 0,
+    type              : ^Renderer_Type       = nil
 ) -> c.uint8_t ---
 
 // Returns name of renderer.
@@ -1512,8 +1512,8 @@ shutdown :: proc() ---
 reset :: proc(
     width             : c.uint32_t,
     height            : c.uint32_t,
-    flags             : c.uint32_t,
-    format            : Texture_Format
+    flags             : c.uint32_t           = RESET_NONE,
+    format            : Texture_Format       = .Count
 ) ---
 
 // Advance to next frame. When using multithreaded renderer, this call
@@ -1522,7 +1522,7 @@ reset :: proc(
 // @param    in  capture           Capture frame with graphics debugger.
 // @returns Current frame number. This might be used in conjunction with double/multi buffering data outside the library and passing it to library via `bgfx::makeRef` calls.
 frame :: proc(
-    capture           : bool
+    capture           : bool                 = false
 ) -> c.uint32_t ---
 
 // Returns current renderer backend API type.
@@ -1587,8 +1587,8 @@ make_ref :: proc(
 make_ref_release :: proc(
     data              : rawptr,
     size              : c.uint32_t,
-    release_fn        : Release_Fn,
-    user_data         : rawptr
+    release_fn        : Release_Fn           = nil,
+    user_data         : rawptr               = nil
 ) -> ^Memory ---
 
 // Set debug flags.
@@ -1609,8 +1609,8 @@ set_debug :: proc(
 // @param    in  attr              Background color.
 // @param    in  small             Default 8x16 or 8x8 font.
 dbg_text_clear :: proc(
-    attr              : c.uint8_t,
-    small             : bool
+    attr              : c.uint8_t            = 0,
+    small             : bool                 = false
 ) ---
 
 // Print formatted data to internal debug text character-buffer (VGA-compatible text mode).
@@ -1659,7 +1659,7 @@ dbg_text_image :: proc(
 //                                       index buffers.
 create_index_buffer :: proc(
     mem               : ^Memory,
-    flags             : c.uint16_t
+    flags             : c.uint16_t           = BUFFER_NONE
 ) -> Index_Buffer_Handle ---
 
 // Set static index buffer debug name.
@@ -1670,7 +1670,7 @@ create_index_buffer :: proc(
 set_index_buffer_name :: proc(
     handle            : Index_Buffer_Handle,
     name              : cstring,
-    len               : c.int32_t
+    len               : c.int32_t            = max(c.int32_t)
 ) ---
 
 // Destroy static index buffer.
@@ -1708,7 +1708,7 @@ destroy_vertex_layout :: proc(
 create_vertex_buffer :: proc(
     mem               : ^Memory,
     layout            : ^Vertex_Layout,
-    flags             : c.uint16_t
+    flags             : c.uint16_t           = BUFFER_NONE
 ) -> Vertex_Buffer_Handle ---
 
 // Set static vertex buffer debug name.
@@ -1719,7 +1719,7 @@ create_vertex_buffer :: proc(
 set_vertex_buffer_name :: proc(
     handle            : Vertex_Buffer_Handle,
     name              : cstring,
-    len               : c.int32_t
+    len               : c.int32_t            = max(c.int32_t)
 ) ---
 
 // Destroy static vertex buffer.
@@ -1745,7 +1745,7 @@ destroy_vertex_buffer :: proc(
 // @returns Dynamic index buffer handle.
 create_dynamic_index_buffer :: proc(
     num               : c.uint32_t,
-    flags             : c.uint16_t
+    flags             : c.uint16_t           = BUFFER_NONE
 ) -> Dynamic_Index_Buffer_Handle ---
 
 // Create a dynamic index buffer and initialize it.
@@ -1765,7 +1765,7 @@ create_dynamic_index_buffer :: proc(
 // @returns Dynamic index buffer handle.
 create_dynamic_index_buffer_mem :: proc(
     mem               : ^Memory,
-    flags             : c.uint16_t
+    flags             : c.uint16_t           = BUFFER_NONE
 ) -> Dynamic_Index_Buffer_Handle ---
 
 // Update dynamic index buffer.
@@ -1803,7 +1803,7 @@ destroy_dynamic_index_buffer :: proc(
 create_dynamic_vertex_buffer :: proc(
     num               : c.uint32_t,
     layout            : ^Vertex_Layout,
-    flags             : c.uint16_t
+    flags             : c.uint16_t           = BUFFER_NONE
 ) -> Dynamic_Vertex_Buffer_Handle ---
 
 // Create dynamic vertex buffer and initialize it.
@@ -1825,7 +1825,7 @@ create_dynamic_vertex_buffer :: proc(
 create_dynamic_vertex_buffer_mem :: proc(
     mem               : ^Memory,
     layout            : ^Vertex_Layout,
-    flags             : c.uint16_t
+    flags             : c.uint16_t           = BUFFER_NONE
 ) -> Dynamic_Vertex_Buffer_Handle ---
 
 // Update dynamic vertex buffer.
@@ -1850,7 +1850,7 @@ destroy_dynamic_vertex_buffer :: proc(
 // @returns Number of requested or maximum available indices.
 get_avail_transient_index_buffer :: proc(
     num               : c.uint32_t,
-    index32           : bool
+    index32           : bool                 = false
 ) -> c.uint32_t ---
 
 // Returns number of requested or maximum available vertices.
@@ -1880,7 +1880,7 @@ get_avail_instance_data_buffer :: proc(
 alloc_transient_index_buffer :: proc(
     tib               : ^Transient_Index_Buffer,
     num               : c.uint32_t,
-    index32           : bool
+    index32           : bool                 = false
 ) ---
 
 // Allocate transient vertex buffer.
@@ -1914,7 +1914,7 @@ alloc_transient_buffers :: proc(
     num_vertices      : c.uint32_t,
     tib               : ^Transient_Index_Buffer,
     num_indices       : c.uint32_t,
-    index32           : bool
+    index32           : bool                 = false
 ) -> bool ---
 
 // Allocate instance data buffer.
@@ -1960,8 +1960,8 @@ create_shader :: proc(
 // @returns Number of uniforms used by shader.
 get_shader_uniforms :: proc(
     handle            : Shader_Handle,
-    uniforms          : ^Uniform_Handle,
-    max               : c.uint16_t
+    uniforms          : ^Uniform_Handle      = nil,
+    max               : c.uint16_t           = 0
 ) -> c.uint16_t ---
 
 // Set shader debug name.
@@ -1972,7 +1972,7 @@ get_shader_uniforms :: proc(
 set_shader_name :: proc(
     handle            : Shader_Handle,
     name              : cstring,
-    len               : c.int32_t
+    len               : c.int32_t            = max(c.int32_t)
 ) ---
 
 // Destroy shader.
@@ -1991,7 +1991,7 @@ destroy_shader :: proc(
 create_program :: proc(
     vsh               : Shader_Handle,
     fsh               : Shader_Handle,
-    destroy_shaders   : bool
+    destroy_shaders   : bool                 = false
 ) -> Program_Handle ---
 
 // Create program with compute shader.
@@ -2000,7 +2000,7 @@ create_program :: proc(
 // @returns Program handle.
 create_compute_program :: proc(
     csh               : Shader_Handle,
-    destroy_shaders   : bool
+    destroy_shaders   : bool                 = false
 ) -> Program_Handle ---
 
 // Destroy program.
@@ -2067,8 +2067,8 @@ calc_texture_size :: proc(
 create_texture :: proc(
     mem               : ^Memory,
     flags             : c.uint64_t,
-    skip              : c.uint8_t,
-    info              : ^Texture_Info
+    skip              : c.uint8_t            = 0,
+    info              : ^Texture_Info        = nil
 ) -> Texture_Handle ---
 
 // Create 2D texture.
@@ -2095,7 +2095,7 @@ create_texture_2d :: proc(
     num_layers        : c.uint16_t,
     format            : Texture_Format,
     flags             : c.uint64_t,
-    mem               : ^Memory
+    mem               : ^Memory              = nil
 ) -> Texture_Handle ---
 
 // Create texture with size based on back-buffer ratio. Texture will maintain ratio
@@ -2117,7 +2117,7 @@ create_texture_2d_scaled :: proc(
     has_mips          : bool,
     num_layers        : c.uint16_t,
     format            : Texture_Format,
-    flags             : c.uint64_t
+    flags             : c.uint64_t           = TEXTURE_NONE | c.uint64_t(SAMPLER_NONE)
 ) -> Texture_Handle ---
 
 // Create 3D texture.
@@ -2142,8 +2142,8 @@ create_texture_3d :: proc(
     depth             : c.uint16_t,
     has_mips          : bool,
     format            : Texture_Format,
-    flags             : c.uint64_t,
-    mem               : ^Memory
+    flags             : c.uint64_t           = TEXTURE_NONE | c.uint64_t(SAMPLER_NONE),
+    mem               : ^Memory              = nil
 ) -> Texture_Handle ---
 
 // Create Cube texture.
@@ -2167,8 +2167,8 @@ create_texture_cube :: proc(
     has_mips          : bool,
     num_layers        : c.uint16_t,
     format            : Texture_Format,
-    flags             : c.uint64_t,
-    mem               : ^Memory
+    flags             : c.uint64_t           = TEXTURE_NONE | c.uint64_t(SAMPLER_NONE),
+    mem               : ^Memory              = nil
 ) -> Texture_Handle ---
 
 // Update 2D texture.
@@ -2192,7 +2192,7 @@ update_texture_2d :: proc(
     width             : c.uint16_t,
     height            : c.uint16_t,
     mem               : ^Memory,
-    pitch             : c.uint16_t
+    pitch             : c.uint16_t           = max(c.uint16_t)
 ) ---
 
 // Update 3D texture.
@@ -2258,7 +2258,7 @@ update_texture_cube :: proc(
     width             : c.uint16_t,
     height            : c.uint16_t,
     mem               : ^Memory,
-    pitch             : c.uint16_t
+    pitch             : c.uint16_t           = max(c.uint16_t)
 ) ---
 
 // Read back texture content.
@@ -2271,7 +2271,7 @@ update_texture_cube :: proc(
 read_texture :: proc(
     handle            : Texture_Handle,
     data              : rawptr,
-    mip               : c.uint8_t
+    mip               : c.uint8_t            = 0
 ) -> c.uint32_t ---
 
 // Set texture debug name.
@@ -2282,7 +2282,7 @@ read_texture :: proc(
 set_texture_name :: proc(
     handle            : Texture_Handle,
     name              : cstring,
-    len               : c.int32_t
+    len               : c.int32_t            = max(c.int32_t)
 ) ---
 
 // Returns texture direct access pointer.
@@ -2315,7 +2315,7 @@ create_frame_buffer :: proc(
     width             : c.uint16_t,
     height            : c.uint16_t,
     format            : Texture_Format,
-    texture_flags     : c.uint64_t
+    texture_flags     : c.uint64_t           = c.uint64_t(SAMPLER_U_CLAMP) | c.uint64_t(SAMPLER_V_CLAMP)
 ) -> Frame_Buffer_Handle ---
 
 // Create frame buffer with size based on back-buffer ratio. Frame buffer will maintain ratio
@@ -2333,7 +2333,7 @@ create_frame_buffer :: proc(
 create_frame_buffer_scaled :: proc(
     ratio             : Backbuffer_Ratio,
     format            : Texture_Format,
-    texture_flags     : c.uint64_t
+    texture_flags     : c.uint64_t           = c.uint64_t(SAMPLER_U_CLAMP) | c.uint64_t(SAMPLER_V_CLAMP)
 ) -> Frame_Buffer_Handle ---
 
 // Create MRT frame buffer from texture handles (simple).
@@ -2345,7 +2345,7 @@ create_frame_buffer_scaled :: proc(
 create_frame_buffer_from_handles :: proc(
     num               : c.uint8_t,
     handles           : ^Texture_Handle,
-    destroy_texture   : bool
+    destroy_texture   : bool                 = false
 ) -> Frame_Buffer_Handle ---
 
 // Create MRT frame buffer from texture handles with specific layer and
@@ -2358,7 +2358,7 @@ create_frame_buffer_from_handles :: proc(
 create_frame_buffer_from_attachment :: proc(
     num               : c.uint8_t,
     attachment        : ^Attachment,
-    destroy_texture   : bool
+    destroy_texture   : bool                 = false
 ) -> Frame_Buffer_Handle ---
 
 // Create frame buffer for multiple window rendering.
@@ -2375,8 +2375,8 @@ create_frame_buffer_from_nwh :: proc(
     nwh               : rawptr,
     width             : c.uint16_t,
     height            : c.uint16_t,
-    format            : Texture_Format,
-    depth_format      : Texture_Format
+    format            : Texture_Format       = .Count,
+    depth_format      : Texture_Format       = .Count
 ) -> Frame_Buffer_Handle ---
 
 // Set frame buffer debug name.
@@ -2387,14 +2387,14 @@ create_frame_buffer_from_nwh :: proc(
 set_frame_buffer_name :: proc(
     handle            : Frame_Buffer_Handle,
     name              : cstring,
-    len               : c.int32_t
+    len               : c.int32_t            = max(c.int32_t)
 ) ---
 
 // Obtain texture handle of frame buffer attachment.
 // @param    in  handle            Frame buffer handle.
 get_texture :: proc(
     handle            : Frame_Buffer_Handle,
-    attachment        : c.uint8_t
+    attachment        : c.uint8_t            = 0
 ) -> Texture_Handle ---
 
 // Destroy frame buffer.
@@ -2433,7 +2433,7 @@ destroy_frame_buffer :: proc(
 create_uniform :: proc(
     name              : cstring,
     type              : Uniform_Type,
-    num               : c.uint16_t
+    num               : c.uint16_t           = 1
 ) -> Uniform_Handle ---
 
 // Retrieve uniform info.
@@ -2461,7 +2461,7 @@ create_occlusion_query :: proc() -> Occlusion_Query_Handle ---
 // @returns Occlusion query result.
 get_result :: proc(
     handle            : Occlusion_Query_Handle,
-    result            : ^c.int32_t
+    result            : ^c.int32_t           = nil
 ) -> Occlusion_Query_Result ---
 
 // Destroy occlusion query.
@@ -2501,7 +2501,7 @@ set_palette_color_rgba8 :: proc(
 set_view_name :: proc(
     id                : View_Id,
     name              : cstring,
-    len               : c.int32_t
+    len               : c.int32_t            = max(c.int32_t)
 ) ---
 
 // Set view rectangle. Draw primitive outside view will be clipped.
@@ -2540,10 +2540,10 @@ set_view_rect_ratio :: proc(
 // @param    in  height            Height of view scissor region.
 set_view_scissor :: proc(
     id                : View_Id,
-    x                 : c.uint16_t,
-    y                 : c.uint16_t,
-    width             : c.uint16_t,
-    height            : c.uint16_t
+    x                 : c.uint16_t           = 0,
+    y                 : c.uint16_t           = 0,
+    width             : c.uint16_t           = 0,
+    height            : c.uint16_t           = 0
 ) ---
 
 // Set view clear flags.
@@ -2556,9 +2556,9 @@ set_view_scissor :: proc(
 set_view_clear :: proc(
     id                : View_Id,
     flags             : c.uint16_t,
-    rgba              : c.uint32_t,
-    depth             : c.float,
-    stencil           : c.uint8_t
+    rgba              : c.uint32_t           = 0x000000f,
+    depth             : c.float              = 1.0,
+    stencil           : c.uint8_t            = 0
 ) ---
 
 // Set view clear flags with different clear color for each
@@ -2582,14 +2582,14 @@ set_view_clear_mrt :: proc(
     flags             : c.uint16_t,
     depth             : c.float,
     stencil           : c.uint8_t,
-    c0                : c.uint8_t,
-    c1                : c.uint8_t,
-    c2                : c.uint8_t,
-    c3                : c.uint8_t,
-    c4                : c.uint8_t,
-    c5                : c.uint8_t,
-    c6                : c.uint8_t,
-    c7                : c.uint8_t
+    c0                : c.uint8_t            = max(c.uint8_t),
+    c1                : c.uint8_t            = max(c.uint8_t),
+    c2                : c.uint8_t            = max(c.uint8_t),
+    c3                : c.uint8_t            = max(c.uint8_t),
+    c4                : c.uint8_t            = max(c.uint8_t),
+    c5                : c.uint8_t            = max(c.uint8_t),
+    c6                : c.uint8_t            = max(c.uint8_t),
+    c7                : c.uint8_t            = max(c.uint8_t)
 ) ---
 
 // Set view sorting mode.
@@ -2599,7 +2599,7 @@ set_view_clear_mrt :: proc(
 // @param    in  mode              View sort mode. See `ViewMode::Enum`.
 set_view_mode :: proc(
     id                : View_Id,
-    mode              : View_Mode
+    mode              : View_Mode            = .Default
 ) ---
 
 // Set view frame buffer.
@@ -2631,9 +2631,9 @@ set_view_transform :: proc(
 // @param    in  order             View remap id table. Passing `NULL` will reset view ids
 //                                 to default state.
 set_view_order :: proc(
-    id                : View_Id,
-    num               : c.uint16_t,
-    order             : ^View_Id
+    id                : View_Id              = 0,
+    num               : c.uint16_t           = max(c.uint16_t),
+    order             : ^View_Id             = nil
 ) ---
 
 // Reset all view settings to default.
@@ -2645,7 +2645,7 @@ reset_view :: proc(
 // @param    in  for_thread        Explicitly request an encoder for a worker thread.
 // @returns Encoder.
 encoder_begin :: proc(
-    for_thread        : bool
+    for_thread        : bool                 = false
 ) -> ^Encoder ---
 
 // End submitting draw calls from thread.
@@ -2662,7 +2662,7 @@ encoder_end :: proc(
 encoder_set_marker :: proc(
     this              : ^Encoder,
     name              : cstring,
-    len               : c.int32_t
+    len               : c.int32_t            = max(c.int32_t)
 ) ---
 
 // Set render states for draw primitive.
@@ -2690,7 +2690,7 @@ encoder_set_marker :: proc(
 encoder_set_state :: proc(
     this              : ^Encoder,
     state             : c.uint64_t,
-    rgba              : c.uint32_t
+    rgba              : c.uint32_t           = 0
 ) ---
 
 // Set condition for rendering.
@@ -2709,7 +2709,7 @@ encoder_set_condition :: proc(
 encoder_set_stencil :: proc(
     this              : ^Encoder,
     fstencil          : c.uint32_t,
-    bstencil          : c.uint32_t
+    bstencil          : c.uint32_t           = STENCIL_NONE
 ) ---
 
 // Set scissor for draw primitive.
@@ -2734,7 +2734,7 @@ encoder_set_scissor :: proc(
 // @param    in  cache             Index in scissor cache.
 encoder_set_scissor_cached :: proc(
     this              : ^Encoder,
-    cache             : c.uint16_t
+    cache             : c.uint16_t           = max(c.uint16_t)
 ) ---
 
 // Set model matrix for draw primitive. If it is not called,
@@ -2745,7 +2745,7 @@ encoder_set_scissor_cached :: proc(
 encoder_set_transform :: proc(
     this              : ^Encoder,
     mtx               : rawptr,
-    num               : c.uint16_t
+    num               : c.uint16_t           = 1
 ) -> c.uint32_t ---
 
 //  Set model matrix from matrix cache for draw primitive.
@@ -2754,7 +2754,7 @@ encoder_set_transform :: proc(
 encoder_set_transform_cached :: proc(
     this              : ^Encoder,
     cache             : c.uint32_t,
-    num               : c.uint16_t
+    num               : c.uint16_t           = 1
 ) ---
 
 // Reserve matrices in internal matrix cache.
@@ -2777,7 +2777,7 @@ encoder_set_uniform :: proc(
     this              : ^Encoder,
     handle            : Uniform_Handle,
     value             : rawptr,
-    num               : c.uint16_t
+    num               : c.uint16_t           = 1
 ) ---
 
 // Set index buffer for draw primitive.
@@ -2840,7 +2840,7 @@ encoder_set_vertex_buffer_with_layout :: proc(
     handle            : Vertex_Buffer_Handle,
     start_vertex      : c.uint32_t,
     num_vertices      : c.uint32_t,
-    layout_handle     : Vertex_Layout_Handle
+    layout_handle     : Vertex_Layout_Handle = { INVALID_HANDLE }
 ) ---
 
 // Set vertex buffer for draw primitive.
@@ -2869,7 +2869,7 @@ encoder_set_dynamic_vertex_buffer_with_layout :: proc(
     handle            : Dynamic_Vertex_Buffer_Handle,
     start_vertex      : c.uint32_t,
     num_vertices      : c.uint32_t,
-    layout_handle     : Vertex_Layout_Handle
+    layout_handle     : Vertex_Layout_Handle = { INVALID_HANDLE }
 ) ---
 
 // Set vertex buffer for draw primitive.
@@ -2899,7 +2899,7 @@ encoder_set_transient_vertex_buffer_with_layout :: proc(
     tvb               : ^Transient_Vertex_Buffer,
     start_vertex      : c.uint32_t,
     num_vertices      : c.uint32_t,
-    layout_handle     : Vertex_Layout_Handle
+    layout_handle     : Vertex_Layout_Handle = { INVALID_HANDLE }
 ) ---
 
 // Set number of vertices for auto generated vertices use in conjunction
@@ -2967,7 +2967,7 @@ encoder_set_texture :: proc(
     stage             : c.uint8_t,
     sampler           : Uniform_Handle,
     handle            : Texture_Handle,
-    flags             : c.uint32_t
+    flags             : c.uint32_t           = max(c.uint32_t)
 ) ---
 
 // Submit an empty primitive for rendering. Uniforms and draw state
@@ -2991,8 +2991,8 @@ encoder_submit :: proc(
     this              : ^Encoder,
     id                : View_Id,
     program           : Program_Handle,
-    depth             : c.uint32_t,
-    flags             : c.uint8_t
+    depth             : c.uint32_t           = 0,
+    flags             : c.uint8_t            = DISCARD_ALL
 ) ---
 
 // Submit primitive with occlusion query for rendering.
@@ -3006,8 +3006,8 @@ encoder_submit_occlusion_query :: proc(
     id                : View_Id,
     program           : Program_Handle,
     occlusion_query   : Occlusion_Query_Handle,
-    depth             : c.uint32_t,
-    flags             : c.uint8_t
+    depth             : c.uint32_t           = 0,
+    flags             : c.uint8_t            = DISCARD_ALL
 ) ---
 
 // Submit primitive for rendering with index and instance data info from
@@ -3025,10 +3025,10 @@ encoder_submit_indirect :: proc(
     id                : View_Id,
     program           : Program_Handle,
     indirect_handle   : Indirect_Buffer_Handle,
-    start             : c.uint32_t,
-    num               : c.uint32_t,
-    depth             : c.uint32_t,
-    flags             : c.uint8_t
+    start             : c.uint32_t           = 0,
+    num               : c.uint32_t           = 1,
+    depth             : c.uint32_t           = 0,
+    flags             : c.uint8_t            = DISCARD_ALL
 ) ---
 
 // Submit primitive for rendering with index and instance data info and
@@ -3051,10 +3051,10 @@ encoder_submit_indirect_count :: proc(
     indirect_handle   : Indirect_Buffer_Handle,
     start             : c.uint32_t,
     num_handle        : Index_Buffer_Handle,
-    num_index         : c.uint32_t,
-    num_max           : c.uint32_t,
-    depth             : c.uint32_t,
-    flags             : c.uint8_t
+    num_index         : c.uint32_t           = 0,
+    num_max           : c.uint32_t           = max(c.uint32_t),
+    depth             : c.uint32_t           = 0,
+    flags             : c.uint8_t            = DISCARD_ALL
 ) ---
 
 // Set compute index buffer.
@@ -3124,7 +3124,7 @@ encoder_set_image :: proc(
     handle            : Texture_Handle,
     mip               : c.uint8_t,
     access            : Access,
-    format            : Texture_Format
+    format            : Texture_Format       = .Count
 ) ---
 
 // Dispatch compute.
@@ -3138,10 +3138,10 @@ encoder_dispatch :: proc(
     this              : ^Encoder,
     id                : View_Id,
     program           : Program_Handle,
-    num_x             : c.uint32_t,
-    num_y             : c.uint32_t,
-    num_z             : c.uint32_t,
-    flags             : c.uint8_t
+    num_x             : c.uint32_t           = 1,
+    num_y             : c.uint32_t           = 1,
+    num_z             : c.uint32_t           = 1,
+    flags             : c.uint8_t            = DISCARD_ALL
 ) ---
 
 // Dispatch compute indirect.
@@ -3156,16 +3156,16 @@ encoder_dispatch_indirect :: proc(
     id                : View_Id,
     program           : Program_Handle,
     indirect_handle   : Indirect_Buffer_Handle,
-    start             : c.uint32_t,
-    num               : c.uint32_t,
-    flags             : c.uint8_t
+    start             : c.uint32_t           = 0,
+    num               : c.uint32_t           = 1,
+    flags             : c.uint8_t            = DISCARD_ALL
 ) ---
 
 // Discard previously set state for draw or compute call.
 // @param    in  flags             Discard or preserve states. See `BGFX_DISCARD_*`.
 encoder_discard :: proc(
     this              : ^Encoder,
-    flags             : c.uint8_t
+    flags             : c.uint8_t            = DISCARD_ALL
 ) ---
 
 // Blit 2D texture region between two 2D textures.
@@ -3199,13 +3199,13 @@ encoder_blit :: proc(
     dst_y             : c.uint16_t,
     dst_z             : c.uint16_t,
     src               : Texture_Handle,
-    src_mip           : c.uint8_t,
-    src_x             : c.uint16_t,
-    src_y             : c.uint16_t,
-    src_z             : c.uint16_t,
-    width             : c.uint16_t,
-    height            : c.uint16_t,
-    depth             : c.uint16_t
+    src_mip           : c.uint8_t            = 0,
+    src_x             : c.uint16_t           = 0,
+    src_y             : c.uint16_t           = 0,
+    src_z             : c.uint16_t           = 0,
+    width             : c.uint16_t           = max(c.uint16_t),
+    height            : c.uint16_t           = max(c.uint16_t),
+    depth             : c.uint16_t           = max(c.uint16_t)
 ) ---
 
 // Request screen shot of window back buffer.
@@ -3231,7 +3231,7 @@ request_screen_shot :: proc(
 // @param    in  msecs             Timeout in milliseconds.
 // @returns Current renderer context state. See: `bgfx::RenderFrame`.
 render_frame :: proc(
-    msecs             : c.int32_t
+    msecs             : c.int32_t            = -1
 ) -> Render_Frame ---
 
 // Set platform data.
@@ -3286,7 +3286,7 @@ override_internal_texture :: proc(
     height            : c.uint16_t,
     num_mips          : c.uint8_t,
     format            : Texture_Format,
-    flags             : c.uint64_t
+    flags             : c.uint64_t           = TEXTURE_NONE | c.uint64_t(SAMPLER_NONE)
 ) -> c.uintptr_t ---
 
 // Sets a debug marker. This allows you to group graphics calls together for easy browsing in
@@ -3296,7 +3296,7 @@ override_internal_texture :: proc(
 //                                 that _name is zero terminated string.
 set_marker :: proc(
     name              : cstring,
-    len               : c.int32_t
+    len               : c.int32_t            = max(c.int32_t)
 ) ---
 
 // Set render states for draw primitive.
@@ -3323,7 +3323,7 @@ set_marker :: proc(
 //                                   `BGFX_STATE_BLEND_INV_FACTOR` blend modes.
 set_state :: proc(
     state             : c.uint64_t,
-    rgba              : c.uint32_t
+    rgba              : c.uint32_t           = 0
 ) ---
 
 // Set condition for rendering.
@@ -3340,7 +3340,7 @@ set_condition :: proc(
 //                                 _fstencil is applied to both front and back facing primitives.
 set_stencil :: proc(
     fstencil          : c.uint32_t,
-    bstencil          : c.uint32_t
+    bstencil          : c.uint32_t           = STENCIL_NONE
 ) ---
 
 // Set scissor for draw primitive.
@@ -3363,7 +3363,7 @@ set_scissor :: proc(
 //   To scissor for all primitives in view see `bgfx::setViewScissor`.
 // @param    in  cache             Index in scissor cache.
 set_scissor_cached :: proc(
-    cache             : c.uint16_t
+    cache             : c.uint16_t           = max(c.uint16_t)
 ) ---
 
 // Set model matrix for draw primitive. If it is not called,
@@ -3373,7 +3373,7 @@ set_scissor_cached :: proc(
 // @returns Index into matrix cache in case the same model matrix has to be used for other draw primitive call.
 set_transform :: proc(
     mtx               : rawptr,
-    num               : c.uint16_t
+    num               : c.uint16_t           = 1
 ) -> c.uint32_t ---
 
 //  Set model matrix from matrix cache for draw primitive.
@@ -3381,7 +3381,7 @@ set_transform :: proc(
 // @param    in  num               Number of matrices from cache.
 set_transform_cached :: proc(
     cache             : c.uint32_t,
-    num               : c.uint16_t
+    num               : c.uint16_t           = 1
 ) ---
 
 // Reserve matrices in internal matrix cache.
@@ -3402,7 +3402,7 @@ alloc_transform :: proc(
 set_uniform :: proc(
     handle            : Uniform_Handle,
     value             : rawptr,
-    num               : c.uint16_t
+    num               : c.uint16_t           = 1
 ) ---
 
 // Set index buffer for draw primitive.
@@ -3460,7 +3460,7 @@ set_vertex_buffer_with_layout :: proc(
     handle            : Vertex_Buffer_Handle,
     start_vertex      : c.uint32_t,
     num_vertices      : c.uint32_t,
-    layout_handle     : Vertex_Layout_Handle
+    layout_handle     : Vertex_Layout_Handle = { INVALID_HANDLE }
 ) ---
 
 // Set vertex buffer for draw primitive.
@@ -3488,7 +3488,7 @@ set_dynamic_vertex_buffer_with_layout :: proc(
     handle            : Dynamic_Vertex_Buffer_Handle,
     start_vertex      : c.uint32_t,
     num_vertices      : c.uint32_t,
-    layout_handle     : Vertex_Layout_Handle
+    layout_handle     : Vertex_Layout_Handle = { INVALID_HANDLE }
 ) ---
 
 // Set vertex buffer for draw primitive.
@@ -3516,7 +3516,7 @@ set_transient_vertex_buffer_with_layout :: proc(
     tvb               : ^Transient_Vertex_Buffer,
     start_vertex      : c.uint32_t,
     num_vertices      : c.uint32_t,
-    layout_handle     : Vertex_Layout_Handle
+    layout_handle     : Vertex_Layout_Handle = { INVALID_HANDLE }
 ) ---
 
 // Set number of vertices for auto generated vertices use in conjunction
@@ -3578,7 +3578,7 @@ set_texture :: proc(
     stage             : c.uint8_t,
     sampler           : Uniform_Handle,
     handle            : Texture_Handle,
-    flags             : c.uint32_t
+    flags             : c.uint32_t           = max(c.uint32_t)
 ) ---
 
 // Submit an empty primitive for rendering. Uniforms and draw state
@@ -3598,8 +3598,8 @@ touch :: proc(
 submit :: proc(
     id                : View_Id,
     program           : Program_Handle,
-    depth             : c.uint32_t,
-    flags             : c.uint8_t
+    depth             : c.uint32_t           = 0,
+    flags             : c.uint8_t            = DISCARD_ALL
 ) ---
 
 // Submit primitive with occlusion query for rendering.
@@ -3612,8 +3612,8 @@ submit_occlusion_query :: proc(
     id                : View_Id,
     program           : Program_Handle,
     occlusion_query   : Occlusion_Query_Handle,
-    depth             : c.uint32_t,
-    flags             : c.uint8_t
+    depth             : c.uint32_t           = 0,
+    flags             : c.uint8_t            = DISCARD_ALL
 ) ---
 
 // Submit primitive for rendering with index and instance data info from
@@ -3630,10 +3630,10 @@ submit_indirect :: proc(
     id                : View_Id,
     program           : Program_Handle,
     indirect_handle   : Indirect_Buffer_Handle,
-    start             : c.uint32_t,
-    num               : c.uint32_t,
-    depth             : c.uint32_t,
-    flags             : c.uint8_t
+    start             : c.uint32_t           = 0,
+    num               : c.uint32_t           = 1,
+    depth             : c.uint32_t           = 0,
+    flags             : c.uint8_t            = DISCARD_ALL
 ) ---
 
 // Submit primitive for rendering with index and instance data info and
@@ -3655,10 +3655,10 @@ submit_indirect_count :: proc(
     indirect_handle   : Indirect_Buffer_Handle,
     start             : c.uint32_t,
     num_handle        : Index_Buffer_Handle,
-    num_index         : c.uint32_t,
-    num_max           : c.uint32_t,
-    depth             : c.uint32_t,
-    flags             : c.uint8_t
+    num_index         : c.uint32_t           = 0,
+    num_max           : c.uint32_t           = max(c.uint32_t),
+    depth             : c.uint32_t           = 0,
+    flags             : c.uint8_t            = DISCARD_ALL
 ) ---
 
 // Set compute index buffer.
@@ -3722,7 +3722,7 @@ set_image :: proc(
     handle            : Texture_Handle,
     mip               : c.uint8_t,
     access            : Access,
-    format            : Texture_Format
+    format            : Texture_Format       = .Count
 ) ---
 
 // Dispatch compute.
@@ -3735,10 +3735,10 @@ set_image :: proc(
 dispatch :: proc(
     id                : View_Id,
     program           : Program_Handle,
-    num_x             : c.uint32_t,
-    num_y             : c.uint32_t,
-    num_z             : c.uint32_t,
-    flags             : c.uint8_t
+    num_x             : c.uint32_t           = 1,
+    num_y             : c.uint32_t           = 1,
+    num_z             : c.uint32_t           = 1,
+    flags             : c.uint8_t            = DISCARD_ALL
 ) ---
 
 // Dispatch compute indirect.
@@ -3752,15 +3752,15 @@ dispatch_indirect :: proc(
     id                : View_Id,
     program           : Program_Handle,
     indirect_handle   : Indirect_Buffer_Handle,
-    start             : c.uint32_t,
-    num               : c.uint32_t,
-    flags             : c.uint8_t
+    start             : c.uint32_t           = 0,
+    num               : c.uint32_t           = 1,
+    flags             : c.uint8_t            = DISCARD_ALL
 ) ---
 
 // Discard previously set state for draw or compute call.
 // @param    in  flags             Draw/compute states to discard.
 discard :: proc(
-    flags             : c.uint8_t
+    flags             : c.uint8_t            = DISCARD_ALL
 ) ---
 
 // Blit 2D texture region between two 2D textures.
@@ -3793,13 +3793,13 @@ blit :: proc(
     dst_y             : c.uint16_t,
     dst_z             : c.uint16_t,
     src               : Texture_Handle,
-    src_mip           : c.uint8_t,
-    src_x             : c.uint16_t,
-    src_y             : c.uint16_t,
-    src_z             : c.uint16_t,
-    width             : c.uint16_t,
-    height            : c.uint16_t,
-    depth             : c.uint16_t
+    src_mip           : c.uint8_t            = 0,
+    src_x             : c.uint16_t           = 0,
+    src_y             : c.uint16_t           = 0,
+    src_z             : c.uint16_t           = 0,
+    width             : c.uint16_t           = max(c.uint16_t),
+    height            : c.uint16_t           = max(c.uint16_t),
+    depth             : c.uint16_t           = max(c.uint16_t)
 ) ---
 
 } // foreign lib
