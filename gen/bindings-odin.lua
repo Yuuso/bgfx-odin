@@ -408,7 +408,7 @@ local function convert_arg_name(arg_name)
         return "_" .. string.lower(uc)
     end)
 
-    -- replace some reserved names...
+    -- Replace some reserved names...
     if name == "enum" then
         name = "type"
     end
@@ -417,6 +417,14 @@ local function convert_arg_name(arg_name)
     end
 
     return name
+end
+
+local function convert_enum_name(name)
+    -- Skip acronyms
+    if name:find("%u%u") then
+        return name
+    end
+    return convert_type_name(name)
 end
 
 
@@ -503,10 +511,11 @@ function converter.types(ttype)
         end
         yield(convert_type_name(ttype.typename) .. " :: enum c.int {")
         for _, item in ipairs(ttype.enum) do
+            local item_name = convert_enum_name(item.name)
             if item.comment then
-                yield(string.format("    %-32s // %s", item.name .. ",", table.concat(item.comment, " ")))
+                yield(string.format("    %-32s // %s", item_name .. ",", table.concat(item.comment, " ")))
             else
-                yield("    " .. item.name .. ",")
+                yield("    " .. item_name .. ",")
             end
         end
         yield("    Count")
@@ -560,7 +569,7 @@ function converter.funcs(func)
 
     for _, arg in ipairs(func.args) do
         if arg.type == "va_list" then
-            -- skip
+            -- Skip
             return
         end
     end
@@ -651,7 +660,7 @@ function generate()
                 table.insert(tmp, "")
             end
         end
-        -- remove trailing whitespace
+        -- Remove trailing whitespace
         return table.concat(tmp, "\n"):gsub("[ ]+%f[\r\n%z]", "")
     end)
     return r

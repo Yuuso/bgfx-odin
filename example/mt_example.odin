@@ -354,7 +354,7 @@ main :: proc() {
     }
 
     iscs.atomic_store(&g_keep_rendering, false)
-    for bgfx.render_frame() != .NoContext {}
+    for bgfx.render_frame() != .No_Context {}
 }
 
 load_program :: proc(

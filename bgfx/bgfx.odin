@@ -576,11 +576,11 @@ CUBE_MAP_POSITIVE_Z                  : c.uint8_t  : 0x04                // Cubem
 CUBE_MAP_NEGATIVE_Z                  : c.uint8_t  : 0x05                // Cubemap -z.
 
 Fatal :: enum c.int {
-    DebugCheck,
-    InvalidShader,
-    UnableToInitialize,
-    UnableToCreateTexture,
-    DeviceLost,
+    Debug_Check,
+    Invalid_Shader,
+    Unable_To_Initialize,
+    Unable_To_Create_Texture,
+    Device_Lost,
     Count
 }
 
@@ -603,7 +603,7 @@ Renderer_Type :: enum c.int {
 Access :: enum c.int {
     Read,                            // Read.
     Write,                           // Write.
-    ReadWrite,                       // Read and write.
+    Read_Write,                      // Read and write.
     Count
 }
 
@@ -619,14 +619,14 @@ Attrib :: enum c.int {
     Color3,                          // a_color3
     Indices,                         // a_indices
     Weight,                          // a_weight
-    TexCoord0,                       // a_texcoord0
-    TexCoord1,                       // a_texcoord1
-    TexCoord2,                       // a_texcoord2
-    TexCoord3,                       // a_texcoord3
-    TexCoord4,                       // a_texcoord4
-    TexCoord5,                       // a_texcoord5
-    TexCoord6,                       // a_texcoord6
-    TexCoord7,                       // a_texcoord7
+    Tex_Coord0,                      // a_texcoord0
+    Tex_Coord1,                      // a_texcoord1
+    Tex_Coord2,                      // a_texcoord2
+    Tex_Coord3,                      // a_texcoord3
+    Tex_Coord4,                      // a_texcoord4
+    Tex_Coord5,                      // a_texcoord5
+    Tex_Coord6,                      // a_texcoord6
+    Tex_Coord7,                      // a_texcoord7
     Count
 }
 
@@ -729,7 +729,7 @@ Texture_Format :: enum c.int {
     RGB5A1,
     RGB10A2,
     RG11B10F,
-    UnknownDepth,                    // Depth formats below.
+    Unknown_Depth,                   // Depth formats below.
     D16,
     D24,
     D24S8,
@@ -766,44 +766,44 @@ Backbuffer_Ratio :: enum c.int {
 Occlusion_Query_Result :: enum c.int {
     Invisible,                       // Query failed test.
     Visible,                         // Query passed test.
-    NoResult,                        // Query result is not available yet.
+    No_Result,                       // Query result is not available yet.
     Count
 }
 
 // Primitive topology:
 Topology :: enum c.int {
-    TriList,                         // Triangle list.
-    TriStrip,                        // Triangle strip.
-    LineList,                        // Line list.
-    LineStrip,                       // Line strip.
-    PointList,                       // Point list.
+    Tri_List,                        // Triangle list.
+    Tri_Strip,                       // Triangle strip.
+    Line_List,                       // Line list.
+    Line_Strip,                      // Line strip.
+    Point_List,                      // Point list.
     Count
 }
 
 // Topology conversion functions:
 Topology_Convert :: enum c.int {
-    TriListFlipWinding,              // Flip winding order of triangle list.
-    TriStripFlipWinding,             // Flip winding order of triangle strip.
-    TriListToLineList,               // Convert triangle list to line list.
-    TriStripToTriList,               // Convert triangle strip to triangle list.
-    LineStripToLineList,             // Convert line strip to line list.
+    Tri_List_Flip_Winding,           // Flip winding order of triangle list.
+    Tri_Strip_Flip_Winding,          // Flip winding order of triangle strip.
+    Tri_List_To_Line_List,           // Convert triangle list to line list.
+    Tri_Strip_To_Tri_List,           // Convert triangle strip to triangle list.
+    Line_Strip_To_Line_List,         // Convert line strip to line list.
     Count
 }
 
 // Topology sort order:
 Topology_Sort :: enum c.int {
-    DirectionFrontToBackMin,
-    DirectionFrontToBackAvg,
-    DirectionFrontToBackMax,
-    DirectionBackToFrontMin,
-    DirectionBackToFrontAvg,
-    DirectionBackToFrontMax,
-    DistanceFrontToBackMin,
-    DistanceFrontToBackAvg,
-    DistanceFrontToBackMax,
-    DistanceBackToFrontMin,
-    DistanceBackToFrontAvg,
-    DistanceBackToFrontMax,
+    Direction_Front_To_Back_Min,
+    Direction_Front_To_Back_Avg,
+    Direction_Front_To_Back_Max,
+    Direction_Back_To_Front_Min,
+    Direction_Back_To_Front_Avg,
+    Direction_Back_To_Front_Max,
+    Distance_Front_To_Back_Min,
+    Distance_Front_To_Back_Avg,
+    Distance_Front_To_Back_Max,
+    Distance_Back_To_Front_Min,
+    Distance_Back_To_Front_Avg,
+    Distance_Back_To_Front_Max,
     Count
 }
 
@@ -811,8 +811,8 @@ Topology_Sort :: enum c.int {
 View_Mode :: enum c.int {
     Default,                         // Default sort order.
     Sequential,                      // Sort in the same order in which submit calls were called.
-    DepthAscending,                  // Sort draw call depth in ascending order.
-    DepthDescending,                 // Sort draw call depth in descending order.
+    Depth_Ascending,                 // Sort draw call depth in ascending order.
+    Depth_Descending,                // Sort draw call depth in descending order.
     Count
 }
 
@@ -824,7 +824,7 @@ Native_Window_Handle_Type :: enum c.int {
 }
 
 Render_Frame :: enum c.int {
-    NoContext,                       // Renderer context is not created yet.
+    No_Context,                      // Renderer context is not created yet.
     Render,                          // Renderer context is created and rendering.
     Timeout,                         // Renderer context wait for main thread signal timed out without rendering.
     Exiting,                         // Renderer context is getting destroyed.
