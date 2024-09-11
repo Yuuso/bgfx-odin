@@ -17,7 +17,7 @@ main :: proc() {
     defer glfw.Terminate()
 
     glfw.WindowHint(glfw.CLIENT_API, glfw.NO_API)
-    window := glfw.CreateWindow(640, 480, "Example", nil, nil)
+    window := glfw.CreateWindow(1280, 720, "Example", nil, nil)
     if window == nil do panic("glfw.CreateWindow failed")
     defer glfw.DestroyWindow(window)
 
@@ -27,8 +27,6 @@ main :: proc() {
                 glfw.SetWindowShouldClose(window, glfw.TRUE)
             }
         })
-
-    bgfx.render_frame()
 
     init : bgfx.Init
     bgfx.init_ctor(&init)
@@ -43,8 +41,8 @@ main :: proc() {
     width, height := glfw.GetWindowSize(window)
     init.resolution.width = cast(c.uint32_t) width
     init.resolution.height = cast(c.uint32_t) height
-    init.resolution.reset = bgfx.RESET_VSYNC
 
+    bgfx.render_frame()
     if !bgfx.init(&init) do panic("bgfx.init failed")
     defer bgfx.shutdown()
 
