@@ -6,6 +6,7 @@
 *.a
 /example/example
 /example/mini_example
+.vscode
 
 # Example shaders
 example/data/bgfx_shader.sh
