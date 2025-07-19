@@ -7,7 +7,7 @@ package bgfx
 import "core:c"
 
 
-API_VERSION :: 128
+API_VERSION :: 129
 
 when ODIN_OS == .Windows {
     when ODIN_DEBUG {
@@ -1328,14 +1328,6 @@ vertex_layout_decode :: proc(
     as_int            : ^bool
 ) ---
 
-// Returns `true` if VertexLayout contains attribute.
-// @param    in  attrib            Attribute semantics. See: `bgfx::Attrib`
-// @returns True if VertexLayout contains attribute.
-vertex_layout_has :: proc(
-    this              : ^Vertex_Layout,
-    attrib            : Attrib
-) -> bool ---
-
 // Skip `_num` bytes in vertex stream.
 // @param    in  num               Number of bytes to skip.
 // @returns Returns itself.
@@ -2066,7 +2058,7 @@ calc_texture_size :: proc(
 // @returns Texture handle.
 create_texture :: proc(
     mem               : ^Memory,
-    flags             : c.uint64_t,
+    flags             : c.uint64_t           = TEXTURE_NONE | c.uint64_t(SAMPLER_NONE),
     skip              : c.uint8_t            = 0,
     info              : ^Texture_Info        = nil
 ) -> Texture_Handle ---
@@ -2094,7 +2086,7 @@ create_texture_2d :: proc(
     has_mips          : bool,
     num_layers        : c.uint16_t,
     format            : Texture_Format,
-    flags             : c.uint64_t,
+    flags             : c.uint64_t           = TEXTURE_NONE | c.uint64_t(SAMPLER_NONE),
     mem               : ^Memory              = nil
 ) -> Texture_Handle ---
 
@@ -2424,6 +2416,7 @@ destroy_frame_buffer :: proc(
 //      - `u_model mat4[BGFX_CONFIG_MAX_BONES]` - array of model matrices.
 //      - `u_modelView mat4` - concatenated model view matrix, only first
 //        model matrix from array is used.
+//      - `u_invModelView mat4` - inverted concatenated model view matrix.
 //      - `u_modelViewProj mat4` - concatenated model view projection matrix.
 //      - `u_alphaRef float` - alpha reference value for alpha test.
 // @param    in  name              Uniform name in shader.
@@ -2476,6 +2469,20 @@ destroy_occlusion_query :: proc(
 set_palette_color :: proc(
     index             : c.uint8_t,
     rgba              : [4]c.float
+) ---
+
+// Set palette color value.
+// @param    in  index             Index into palette.
+// @param    in  r                 Red value (RGBA floating point values)
+// @param    in  g                 Green value (RGBA floating point values)
+// @param    in  b                 Blue value (RGBA floating point values)
+// @param    in  a                 Alpha value (RGBA floating point values)
+set_palette_color_rgba32f :: proc(
+    index             : c.uint8_t,
+    r                 : c.float,
+    g                 : c.float,
+    b                 : c.float,
+    a                 : c.float
 ) ---
 
 // Set palette color value.
