@@ -413,12 +413,18 @@ set_allocator_vtable :: proc(
         file            : cstring,
         line            : c.uint32_t
     ) -> (result : rawptr) {
+        if ptr == nil && size == 0 {
+            return nil
+        }
+
         context = runtime.default_context()
+
         loc : runtime.Source_Code_Location
         loc.line = cast(i32) line
         loc.file_path = string(file)
 
-        size_for_size := max(cast(int) align, size_of(int))
+        align : int = align == 0 ? runtime.DEFAULT_ALIGNMENT : int(align)
+        size_for_size := max(align, size_of(int))
 
         new_size : int
         if size > 0 {
@@ -437,7 +443,7 @@ set_allocator_vtable :: proc(
             old_ptr,
             old_size,
             new_size,
-            cast(int) align,
+            align,
             context.allocator,
             loc)
         assert(err == nil)
