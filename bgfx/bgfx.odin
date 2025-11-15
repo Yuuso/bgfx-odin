@@ -7,7 +7,7 @@ package bgfx
 import "core:c"
 
 
-API_VERSION :: 129
+API_VERSION :: 135
 
 when ODIN_OS == .Windows {
     when ODIN_DEBUG {
@@ -351,15 +351,15 @@ DEBUG_STATS                          : c.uint32_t : 0x00000004          // Enabl
 DEBUG_TEXT                           : c.uint32_t : 0x00000008          // Enable debug text display.
 DEBUG_PROFILER                       : c.uint32_t : 0x00000010          // Enable profiler. This causes per-view statistics to be collected, available through `bgfx::Stats::ViewStats`. This is unrelated to the profiler functions in `bgfx::CallbackI`.
 
-BUFFER_COMPUTE_FORMAT_8X1            : c.uint16_t : 0x0001              // 1 8-bit value
-BUFFER_COMPUTE_FORMAT_8X2            : c.uint16_t : 0x0002              // 2 8-bit values
-BUFFER_COMPUTE_FORMAT_8X4            : c.uint16_t : 0x0003              // 4 8-bit values
-BUFFER_COMPUTE_FORMAT_16X1           : c.uint16_t : 0x0004              // 1 16-bit value
-BUFFER_COMPUTE_FORMAT_16X2           : c.uint16_t : 0x0005              // 2 16-bit values
-BUFFER_COMPUTE_FORMAT_16X4           : c.uint16_t : 0x0006              // 4 16-bit values
-BUFFER_COMPUTE_FORMAT_32X1           : c.uint16_t : 0x0007              // 1 32-bit value
-BUFFER_COMPUTE_FORMAT_32X2           : c.uint16_t : 0x0008              // 2 32-bit values
-BUFFER_COMPUTE_FORMAT_32X4           : c.uint16_t : 0x0009              // 4 32-bit values
+BUFFER_COMPUTE_FORMAT_8X1            : c.uint16_t : 0x0001              // 1 x 8-bit value
+BUFFER_COMPUTE_FORMAT_8X2            : c.uint16_t : 0x0002              // 2 x 8-bit values
+BUFFER_COMPUTE_FORMAT_8X4            : c.uint16_t : 0x0003              // 4 x 8-bit values
+BUFFER_COMPUTE_FORMAT_16X1           : c.uint16_t : 0x0004              // 1 x 16-bit value
+BUFFER_COMPUTE_FORMAT_16X2           : c.uint16_t : 0x0005              // 2 x 16-bit values
+BUFFER_COMPUTE_FORMAT_16X4           : c.uint16_t : 0x0006              // 4 x 16-bit values
+BUFFER_COMPUTE_FORMAT_32X1           : c.uint16_t : 0x0007              // 1 x 32-bit value
+BUFFER_COMPUTE_FORMAT_32X2           : c.uint16_t : 0x0008              // 2 x 32-bit values
+BUFFER_COMPUTE_FORMAT_32X4           : c.uint16_t : 0x0009              // 4 x 32-bit values
 BUFFER_COMPUTE_FORMAT_SHIFT          : c.uint16_t : 0
 BUFFER_COMPUTE_FORMAT_MASK           : c.uint16_t : 0x000f
 
@@ -532,10 +532,11 @@ CAPS_TEXTURE_READ_BACK               : c.uint64_t : 0x0000000000800000  // Read-
 CAPS_TEXTURE_2D_ARRAY                : c.uint64_t : 0x0000000001000000  // 2D texture array is supported.
 CAPS_TEXTURE_3D                      : c.uint64_t : 0x0000000002000000  // 3D textures are supported.
 CAPS_TRANSPARENT_BACKBUFFER          : c.uint64_t : 0x0000000004000000  // Transparent back buffer supported.
-CAPS_VERTEX_ATTRIB_HALF              : c.uint64_t : 0x0000000008000000  // Vertex attribute half-float is supported.
-CAPS_VERTEX_ATTRIB_UINT10            : c.uint64_t : 0x0000000010000000  // Vertex attribute 10_10_10_2 is supported.
-CAPS_VERTEX_ID                       : c.uint64_t : 0x0000000020000000  // Rendering with VertexID only is supported.
-CAPS_VIEWPORT_LAYER_ARRAY            : c.uint64_t : 0x0000000040000000  // Viewport layer is available in vertex shader.
+CAPS_VARIABLE_RATE_SHADING           : c.uint64_t : 0x0000000008000000  // Variable Rate Shading
+CAPS_VERTEX_ATTRIB_HALF              : c.uint64_t : 0x0000000010000000  // Vertex attribute half-float is supported.
+CAPS_VERTEX_ATTRIB_UINT10            : c.uint64_t : 0x0000000020000000  // Vertex attribute 10_10_10_2 is supported.
+CAPS_VERTEX_ID                       : c.uint64_t : 0x0000000040000000  // Rendering with VertexID only is supported.
+CAPS_VIEWPORT_LAYER_ARRAY            : c.uint64_t : 0x0000000080000000  // Viewport layer is available in vertex shader.
 CAPS_TEXTURE_COMPARE_ALL             : c.uint64_t : 0x0000000000180000  // All texture compare modes are supported.
 
 CAPS_FORMAT_TEXTURE_NONE             : c.uint32_t : 0x00000000          // Texture format is not supported.
@@ -653,6 +654,10 @@ Texture_Format :: enum c.int {
     ETC2,                            // ETC2 RGB8
     ETC2A,                           // ETC2 RGBA8
     ETC2A1,                          // ETC2 RGB8A1
+    EACR11,                          // EAC R11 UNORM
+    EACR11S,                         // EAC R11 SNORM
+    EACRG11,                         // EAC RG11 UNORM
+    EACRG11S,                        // EAC RG11 SNORM
     PTC12,                           // PVRTC1 RGB 2BPP
     PTC14,                           // PVRTC1 RGB 4BPP
     PTC12A,                          // PVRTC1 RGBA 2BPP
@@ -751,6 +756,14 @@ Uniform_Type :: enum c.int {
     Count
 }
 
+// Uniform frequency:
+Uniform_Freq :: enum c.int {
+    Draw,                            // Changing per draw call.
+    View,                            // Changing per view.
+    Frame,                           // Changing per frame.
+    Count
+}
+
 // Backbuffer ratios:
 Backbuffer_Ratio :: enum c.int {
     Equal,                           // Equal to backbuffer.
@@ -816,6 +829,18 @@ View_Mode :: enum c.int {
     Count
 }
 
+// Shading rate:
+Shading_Rate :: enum c.int {
+    Rate1x1,                         // 1x1
+    Rate1x2,                         // 1x2
+    Rate2x1,                         // 2x1
+    Rate2x2,                         // 2x2
+    Rate2x4,                         // 2x4
+    Rate4x2,                         // 4x2
+    Rate4x4,                         // 4x4
+    Count
+}
+
 // Native Window handle type:
 Native_Window_Handle_Type :: enum c.int {
     Default,                         // Platform default handle type (X11 on Linux).
@@ -861,8 +886,9 @@ Caps_Limits :: struct {
     max_occlusion_queries       : c.uint32_t,                 // Maximum number of occlusion query handles.
     max_encoders                : c.uint32_t,                 // Maximum number of encoder threads.
     min_resource_cb_size        : c.uint32_t,                 // Minimum resource command buffer size.
-    transient_vb_size           : c.uint32_t,                 // Maximum transient vertex buffer size.
-    transient_ib_size           : c.uint32_t,                 // Maximum transient index buffer size.
+    max_transient_vb_size       : c.uint32_t,                 // Maximum transient vertex buffer size.
+    max_tansient_ib_size        : c.uint32_t,                 // Maximum transient index buffer size.
+    min_uniform_buffer_size     : c.uint32_t,                 // Mimimum uniform buffer size.
 }
 
 // Renderer capabilities.
@@ -936,7 +962,8 @@ Platform_Data :: struct {
 
 // Backbuffer resolution and reset parameters.
 Resolution :: struct {
-    format                      : Texture_Format,             // Backbuffer format.
+    format_color                : Texture_Format,             // Backbuffer color format.
+    format_depth_stencil        : Texture_Format,             // Backbuffer depth/stencil format.
     width                       : c.uint32_t,                 // Backbuffer width.
     height                      : c.uint32_t,                 // Backbuffer height.
     reset                       : c.uint32_t,                 // Reset parameters.
@@ -949,8 +976,9 @@ Resolution :: struct {
 Init_Limits :: struct {
     max_encoders                : c.uint16_t,                 // Maximum number of encoder threads.
     min_resource_cb_size        : c.uint32_t,                 // Minimum resource command buffer size.
-    transient_vb_size           : c.uint32_t,                 // Maximum transient vertex buffer size.
-    transient_ib_size           : c.uint32_t,                 // Maximum transient index buffer size.
+    max_transient_vb_size       : c.uint32_t,                 // Maximum transient vertex buffer size.
+    max_transient_ib_size       : c.uint32_t,                 // Maximum transient index buffer size.
+    min_uniform_buffer_size     : c.uint32_t,                 // Mimimum uniform buffer size.
 }
 
 // Initialization parameters used by `bgfx::init`.
@@ -1531,6 +1559,7 @@ get_caps :: proc() -> ^Caps ---
 
 // Returns performance counters.
 // @attention Pointer returned is valid until `bgfx::frame` is called.
+// @returns Performance counters.
 get_stats :: proc() -> ^Stats ---
 
 // Allocate buffer to pass to bgfx calls. Data will be freed inside bgfx.
@@ -2429,6 +2458,42 @@ create_uniform :: proc(
     num               : c.uint16_t           = 1
 ) -> Uniform_Handle ---
 
+// Create shader uniform parameter.
+// @remarks
+//   1. Uniform names are unique. It's valid to call `bgfx::createUniform`
+//      multiple times with the same uniform name. The library will always
+//      return the same handle, but the handle reference count will be
+//      incremented. This means that the same number of `bgfx::destroyUniform`
+//      must be called to properly destroy the uniform.
+//   2. Predefined uniforms (declared in `bgfx_shader.sh`):
+//      - `u_viewRect vec4(x, y, width, height)` - view rectangle for current
+//        view, in pixels.
+//      - `u_viewTexel vec4(1.0/width, 1.0/height, undef, undef)` - inverse
+//        width and height
+//      - `u_view mat4` - view matrix
+//      - `u_invView mat4` - inverted view matrix
+//      - `u_proj mat4` - projection matrix
+//      - `u_invProj mat4` - inverted projection matrix
+//      - `u_viewProj mat4` - concatenated view projection matrix
+//      - `u_invViewProj mat4` - concatenated inverted view projection matrix
+//      - `u_model mat4[BGFX_CONFIG_MAX_BONES]` - array of model matrices.
+//      - `u_modelView mat4` - concatenated model view matrix, only first
+//        model matrix from array is used.
+//      - `u_invModelView mat4` - inverted concatenated model view matrix.
+//      - `u_modelViewProj mat4` - concatenated model view projection matrix.
+//      - `u_alphaRef float` - alpha reference value for alpha test.
+// @param    in  name              Uniform name in shader.
+// @param    in  freq              Uniform change frequency (See: `bgfx::UniformFreq`).
+// @param    in  type              Type of uniform (See: `bgfx::UniformType`).
+// @param    in  num               Number of elements in array.
+// @returns Handle to uniform object.
+create_uniform_with_freq :: proc(
+    name              : cstring,
+    freq              : Uniform_Freq,
+    type              : Uniform_Type,
+    num               : c.uint16_t           = 1
+) -> Uniform_Handle ---
+
 // Retrieve uniform info.
 // @param    in  handle            Handle to uniform object.
 // @param   out  info              Uniform info.
@@ -2643,7 +2708,17 @@ set_view_order :: proc(
     order             : ^View_Id             = nil
 ) ---
 
+// Set view shading rate.
+// @attention Availability depends on: `BGFX_CAPS_VARIABLE_RATE_SHADING`.
+// @param    in  id                View id.
+// @param    in  shading_rate      Shading rate.
+set_view_shading_rate :: proc(
+    id                : View_Id,
+    shading_rate      : Shading_Rate         = .Rate1x1
+) ---
+
 // Reset all view settings to default.
+// @param    in  id                _id View id.
 reset_view :: proc(
     id                : View_Id
 ) ---
@@ -2782,6 +2857,32 @@ encoder_alloc_transform :: proc(
 //                                 use the _num passed on uniform creation.
 encoder_set_uniform :: proc(
     this              : ^Encoder,
+    handle            : Uniform_Handle,
+    value             : rawptr,
+    num               : c.uint16_t           = 1
+) ---
+
+// Set shader uniform parameter for view.
+// @attention Uniform must be created with `bgfx::UniformFreq::View` argument.
+// @param    in  id                View id.
+// @param    in  handle            Uniform.
+// @param    in  value             Pointer to uniform data.
+// @param    in  num               Number of elements. Passing `UINT16_MAX` will
+//                                 use the _num passed on uniform creation.
+set_view_uniform :: proc(
+    id                : View_Id,
+    handle            : Uniform_Handle,
+    value             : rawptr,
+    num               : c.uint16_t           = 1
+) ---
+
+// Set shader uniform parameter for frame.
+// @attention Uniform must be created with `bgfx::UniformFreq::View` argument.
+// @param    in  handle            Uniform.
+// @param    in  value             Pointer to uniform data.
+// @param    in  num               Number of elements. Passing `UINT16_MAX` will
+//                                 use the _num passed on uniform creation.
+set_frame_uniform :: proc(
     handle            : Uniform_Handle,
     value             : rawptr,
     num               : c.uint16_t           = 1
@@ -2954,6 +3055,7 @@ encoder_set_instance_data_from_dynamic_vertex_buffer :: proc(
 // Set number of instances for auto generated instances use in conjunction
 // with gl_InstanceID.
 // @attention Availability depends on: `BGFX_CAPS_VERTEX_ID`.
+// @param    in  num_instances     Number of instances.
 encoder_set_instance_count :: proc(
     this              : ^Encoder,
     num_instances     : c.uint32_t
@@ -3262,10 +3364,12 @@ get_internal_data :: proc() -> ^Internal_Data ---
 // @warning Must be called only on render thread.
 // @param    in  handle            Texture handle.
 // @param    in  ptr               Native API pointer to texture.
+// @param    in  layer_index       Layer index for texture arrays (only implemented for D3D11).
 // @returns Native API pointer to texture. If result is 0, texture is not created yet from the main thread.
 override_internal_texture_ptr :: proc(
     handle            : Texture_Handle,
-    ptr               : c.uintptr_t
+    ptr               : c.uintptr_t,
+    layer_index       : c.uint16_t           = 0
 ) -> c.uintptr_t ---
 
 // Override internal texture by creating new texture. Previously created
@@ -3567,6 +3671,7 @@ set_instance_data_from_dynamic_vertex_buffer :: proc(
 // Set number of instances for auto generated instances use in conjunction
 // with gl_InstanceID.
 // @attention Availability depends on: `BGFX_CAPS_VERTEX_ID`.
+// @param    in  num_instances     Number of instances.
 set_instance_count :: proc(
     num_instances     : c.uint32_t
 ) ---
