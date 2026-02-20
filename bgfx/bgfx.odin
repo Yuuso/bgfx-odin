@@ -7,7 +7,7 @@ package bgfx
 import "core:c"
 
 
-API_VERSION :: 135
+API_VERSION :: 139
 
 when ODIN_OS == .Windows {
     when ODIN_DEBUG {
@@ -384,6 +384,7 @@ TEXTURE_COMPUTE_WRITE                : c.uint64_t : 0x0000100000000000  // Textu
 TEXTURE_SRGB                         : c.uint64_t : 0x0000200000000000  // Sample texture as sRGB.
 TEXTURE_BLIT_DST                     : c.uint64_t : 0x0000400000000000  // Texture will be used as blit destination.
 TEXTURE_READ_BACK                    : c.uint64_t : 0x0000800000000000  // Texture will be used for read back from GPU.
+TEXTURE_EXTERNAL_SHARED              : c.uint64_t : 0x0001000000000000  // Texture is shared with other device or other process.
 
 TEXTURE_RT_MSAA_X2                   : c.uint64_t : 0x0000002000000000  // Render target MSAAx2 mode.
 TEXTURE_RT_MSAA_X4                   : c.uint64_t : 0x0000003000000000  // Render target MSAAx4 mode.
@@ -528,15 +529,17 @@ CAPS_TEXTURE_COMPARE_LEQUAL          : c.uint64_t : 0x0000000000080000  // Textu
 CAPS_TEXTURE_COMPARE_RESERVED        : c.uint64_t : 0x0000000000100000
 CAPS_TEXTURE_CUBE_ARRAY              : c.uint64_t : 0x0000000000200000  // Cubemap texture array is supported.
 CAPS_TEXTURE_DIRECT_ACCESS           : c.uint64_t : 0x0000000000400000  // CPU direct access to GPU texture memory.
-CAPS_TEXTURE_READ_BACK               : c.uint64_t : 0x0000000000800000  // Read-back texture is supported.
-CAPS_TEXTURE_2D_ARRAY                : c.uint64_t : 0x0000000001000000  // 2D texture array is supported.
-CAPS_TEXTURE_3D                      : c.uint64_t : 0x0000000002000000  // 3D textures are supported.
-CAPS_TRANSPARENT_BACKBUFFER          : c.uint64_t : 0x0000000004000000  // Transparent back buffer supported.
-CAPS_VARIABLE_RATE_SHADING           : c.uint64_t : 0x0000000008000000  // Variable Rate Shading
-CAPS_VERTEX_ATTRIB_HALF              : c.uint64_t : 0x0000000010000000  // Vertex attribute half-float is supported.
-CAPS_VERTEX_ATTRIB_UINT10            : c.uint64_t : 0x0000000020000000  // Vertex attribute 10_10_10_2 is supported.
-CAPS_VERTEX_ID                       : c.uint64_t : 0x0000000040000000  // Rendering with VertexID only is supported.
-CAPS_VIEWPORT_LAYER_ARRAY            : c.uint64_t : 0x0000000080000000  // Viewport layer is available in vertex shader.
+CAPS_TEXTURE_EXTERNAL                : c.uint64_t : 0x0000000000800000  // External texture is supported.
+CAPS_TEXTURE_EXTERNAL_SHARED         : c.uint64_t : 0x0000000001000000  // External shared texture is supported.
+CAPS_TEXTURE_READ_BACK               : c.uint64_t : 0x0000000002000000  // Read-back texture is supported.
+CAPS_TEXTURE_2D_ARRAY                : c.uint64_t : 0x0000000004000000  // 2D texture array is supported.
+CAPS_TEXTURE_3D                      : c.uint64_t : 0x0000000008000000  // 3D textures are supported.
+CAPS_TRANSPARENT_BACKBUFFER          : c.uint64_t : 0x0000000010000000  // Transparent back buffer supported.
+CAPS_VARIABLE_RATE_SHADING           : c.uint64_t : 0x0000000020000000  // Variable Rate Shading
+CAPS_VERTEX_ATTRIB_HALF              : c.uint64_t : 0x0000000040000000  // Vertex attribute half-float is supported.
+CAPS_VERTEX_ATTRIB_UINT10            : c.uint64_t : 0x0000000080000000  // Vertex attribute 10_10_10_2 is supported.
+CAPS_VERTEX_ID                       : c.uint64_t : 0x0000000100000000  // Rendering with VertexID only is supported.
+CAPS_VIEWPORT_LAYER_ARRAY            : c.uint64_t : 0x0000000200000000  // Viewport layer is available in vertex shader.
 CAPS_TEXTURE_COMPARE_ALL             : c.uint64_t : 0x0000000000180000  // All texture compare modes are supported.
 
 CAPS_FORMAT_TEXTURE_NONE             : c.uint32_t : 0x00000000          // Texture format is not supported.
@@ -576,6 +579,10 @@ CUBE_MAP_NEGATIVE_Y                  : c.uint8_t  : 0x03                // Cubem
 CUBE_MAP_POSITIVE_Z                  : c.uint8_t  : 0x04                // Cubemap +z.
 CUBE_MAP_NEGATIVE_Z                  : c.uint8_t  : 0x05                // Cubemap -z.
 
+FRAME_NONE                           : c.uint8_t  : 0x00                // No frame flags.
+FRAME_DEBUG_CAPTURE                  : c.uint8_t  : 0x01                // Capture frame with graphics debugger.
+FRAME_DISCARD                        : c.uint8_t  : 0x02                // Discard all draw calls.
+
 Fatal :: enum c.int {
     Debug_Check,
     Invalid_Shader,
@@ -597,6 +604,7 @@ Renderer_Type :: enum c.int {
     OpenGLES,                        // OpenGL ES 2.0+
     OpenGL,                          // OpenGL 2.1+
     Vulkan,                          // Vulkan
+    WebGPU,                          // WebGPU
     Count
 }
 
@@ -949,6 +957,7 @@ Platform_Data :: struct {
     // GL context, D3D device, or Vulkan device. If `NULL`, bgfx
     // will create context/device.
     ctx                         : rawptr,
+    queue                       : rawptr,                     // D3D12 Queue. If `NULL` bgfx will create queue.
 
     // GL back-buffer, or D3D render target view. If `NULL` bgfx will
     // create back-buffer color surface.
@@ -1006,6 +1015,7 @@ Init :: struct {
     capabilities                : c.uint64_t,                 // Capabilities initialization mask (default: UINT64_MAX).
     debug                       : bool,                       // Enable device for debugging.
     profile                     : bool,                       // Enable device for profiling.
+    fallback                    : bool,                       // Enable fallback to next available renderer.
     platform_data               : Platform_Data,              // Platform data.
     resolution                  : Resolution,                 // Backbuffer resolution and reset parameters. See: `bgfx::Resolution`.
     limits                      : Init_Limits,                // Configurable runtime limits parameters.
@@ -1539,10 +1549,13 @@ reset :: proc(
 // Advance to next frame. When using multithreaded renderer, this call
 // just swaps internal buffers, kicks render thread, and returns. In
 // singlethreaded renderer this call does frame rendering.
-// @param    in  capture           Capture frame with graphics debugger.
+// @param    in  flags             Frame flags. See: `BGFX_FRAME_*` for more info.
+//                                   - `BGFX_FRAME_NONE` - No frame flag.
+//                                   - `BGFX_FRAME_DEBUG_CAPTURE` - Capture frame with graphics debugger.
+//                                   - `BGFX_FRAME_DISCARD` - Discard all draw calls.
 // @returns Current frame number. This might be used in conjunction with double/multi buffering data outside the library and passing it to library via `bgfx::makeRef` calls.
 frame :: proc(
-    capture           : bool                 = false
+    flags             : c.uint8_t            = FRAME_NONE
 ) -> c.uint32_t ---
 
 // Returns current renderer backend API type.
@@ -2108,6 +2121,7 @@ create_texture :: proc(
 // @param    in  mem               Texture data. If `_mem` is non-NULL, created texture will be immutable. If
 //                                 `_mem` is NULL content of the texture is uninitialized. When `_numLayers` is more than
 //                                 1, expected memory layout is texture and all mips together for each array element.
+// @param    in  external          Native API pointer to texture.
 // @returns Texture handle.
 create_texture_2d :: proc(
     width             : c.uint16_t,
@@ -2116,7 +2130,8 @@ create_texture_2d :: proc(
     num_layers        : c.uint16_t,
     format            : Texture_Format,
     flags             : c.uint64_t           = TEXTURE_NONE | c.uint64_t(SAMPLER_NONE),
-    mem               : ^Memory              = nil
+    mem               : ^Memory              = nil,
+    external          : c.uint64_t           = 0
 ) -> Texture_Handle ---
 
 // Create texture with size based on back-buffer ratio. Texture will maintain ratio
@@ -2156,6 +2171,7 @@ create_texture_2d_scaled :: proc(
 // @param    in  mem               Texture data. If `_mem` is non-NULL, created texture will be immutable. If
 //                                 `_mem` is NULL content of the texture is uninitialized. When `_numLayers` is more than
 //                                 1, expected memory layout is texture and all mips together for each array element.
+// @param    in  external          Native API pointer to texture.
 // @returns Texture handle.
 create_texture_3d :: proc(
     width             : c.uint16_t,
@@ -2164,7 +2180,8 @@ create_texture_3d :: proc(
     has_mips          : bool,
     format            : Texture_Format,
     flags             : c.uint64_t           = TEXTURE_NONE | c.uint64_t(SAMPLER_NONE),
-    mem               : ^Memory              = nil
+    mem               : ^Memory              = nil,
+    external          : c.uint64_t           = 0
 ) -> Texture_Handle ---
 
 // Create Cube texture.
@@ -2181,7 +2198,7 @@ create_texture_3d :: proc(
 //                                   sampling.
 // @param    in  mem               Texture data. If `_mem` is non-NULL, created texture will be immutable. If
 //                                 `_mem` is NULL content of the texture is uninitialized. When `_numLayers` is more than
-//                                 1, expected memory layout is texture and all mips together for each array element.
+// @param    in  external          Native API pointer to texture.
 // @returns Texture handle.
 create_texture_cube :: proc(
     size              : c.uint16_t,
@@ -2189,7 +2206,8 @@ create_texture_cube :: proc(
     num_layers        : c.uint16_t,
     format            : Texture_Format,
     flags             : c.uint64_t           = TEXTURE_NONE | c.uint64_t(SAMPLER_NONE),
-    mem               : ^Memory              = nil
+    mem               : ^Memory              = nil,
+    external          : c.uint64_t           = 0
 ) -> Texture_Handle ---
 
 // Update 2D texture.
